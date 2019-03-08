@@ -1,5 +1,13 @@
 #!/usr/bin/env ruby
 class Board
+    attr_accessor :board_area
+    def initialize
+        self.board_area = Array.new(9) { " " }
+    end
+
+    def show
+        self.board_area.each_slice(3).to_a.each { |row| puts " #{row[0]} | #{row[1]} | #{row[2]} " }
+    end
 end
 
 class Player
@@ -32,6 +40,10 @@ def game
     players = get_play_order(player1, player2)
     puts("#{player1.name} rolled #{player1.last_roll} ... #{player2.name} rolled #{player2.last_roll}.")
     puts("#{players[0].name} goes first!")
+
+    board = Board.new
+    board.show
+
 end
 
 game
