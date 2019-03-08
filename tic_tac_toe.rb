@@ -12,6 +12,10 @@ class Board
     def place_marker(marker, location)
         board_area[location.first][location.last] = marker
     end
+
+    def space_available?(row, col)
+        self.board_area[row][col] == 0 ? true : puts("Space taken. Try again.")
+    end
 end
 
 class Player
@@ -33,21 +37,19 @@ class Player
         game_board.place_marker(self.marker, location)
     end
 
-    def get_location
-        row = -1
-        col = -1
-        while !valid_location?(row, col) do
+    def get_location(board)
+        begin
             puts "choose a row"
             row = gets.chomp.to_i
             puts "choose a column"
             col = gets.chomp.to_i
-        end
-    [row, col]
+        end until within_range?(row, col) && board.space_available?(row, col)
+        [row, col]
     end
 
     private
-    def valid_location?(row, col)
-        row.between?(0, 2) && col.between?(0,2)
+    def within_range?(row, col)
+        row.between?(0, 2) && col.between?(0,2) ? true : puts("Out of range. Try again.")
     end
 end
 
@@ -73,7 +75,7 @@ def game
     # first player is assigned 'x' second player is assigned 'o'
     # player picks a coordinate on the board
     players.each do |player|
-        location = player.get_location
+        location = player.get_location(board)
         player.place_marker(board, location)
         board.show
     end
