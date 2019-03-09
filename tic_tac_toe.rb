@@ -1,13 +1,15 @@
 #!/usr/bin/env ruby
 class Game
-    attr_accessor :board
+    attr_accessor :board, :players
     def initialize
         self.board = Array.new(9) { 0 }.each_slice(3).to_a
+        self.players = set_turn_order(Player.new("Player 1", -1), Player.new("Player 2", 1))
     end
 
-    def play(players)
+    def play
+        show_last_roll_results
         loop do
-            players.each do |player|
+            self.players.each do |player|
                 location = player.get_location(self)
                 player.place_marker(self, location)
                 show_board
@@ -21,6 +23,11 @@ class Game
                 end
             end
         end
+    end
+
+    def show_last_roll_results
+        puts("#{self.players[0].name} rolled #{self.players[0].last_roll} ... #{self.players[1].name} rolled #{self.players[1].last_roll}.")
+        puts("#{self.players[0].name} goes first!")
     end
 
     def show_board
@@ -41,6 +48,14 @@ class Game
 
     def player_wins?
     end
+
+    private
+    # returns an array that reflects the player turn order based on a dice roll
+    def set_turn_order(player1, player2)
+        players = [player1, player2]
+        players.sort! { |one, two| one.roll_dice <=> two.roll_dice }.reverse!
+    end
+
 end
 
 class Player
@@ -62,9 +77,9 @@ class Player
 
     def get_location(game)
         begin
-            puts "choose a row"
+            puts "Choose a row"
             row = gets.chomp.to_i
-            puts "choose a column"
+            puts "Choose a column"
             col = gets.chomp.to_i
         end until within_range?(row, col) && game.space_available?(row, col)
         [row, col]
@@ -76,20 +91,4 @@ class Player
     end
 end
 
-# returns an array that reflects the player turn order based on a dice roll
-def get_play_order(player1, player2)
-    players = [player1, player2]
-    players.sort! { |one, two| one.roll_dice <=> two.roll_dice }.reverse!
-end
-
-player1 = Player.new("Player1", -1)
-player2 = Player.new("Player2", 1)
-game = Game.new
-
-# determine who goes first
-players = get_play_order(player1, player2)
-puts("#{player1.name} rolled #{player1.last_roll} ... #{player2.name} rolled #{player2.last_roll}.")
-puts("#{players[0].name} goes first!")
-game.show_board
-
-game.play(players)
+game = Game.new.play
