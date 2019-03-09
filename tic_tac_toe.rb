@@ -13,7 +13,7 @@ class Game
                 location = player.get_location(self)
                 player.place_marker(self, location)
                 show_board
-                if player_wins?
+                if player_wins?(location)
                     game_over = true
                     puts "GAME OVER #{player.name.upcase} WINS!"
                     return 
@@ -46,11 +46,30 @@ class Game
         self.board.join.count("0") == 0
     end
 
-    def player_wins?
+    def row_win?(row)
+        sum = row.reduce { |total, val| total + val }
+        sum == 3 || sum == -3 ? true : false
     end
 
-    private
-    # returns an array that reflects the player turn order based on a dice roll
+    def column_win?
+        false
+    end
+
+    def diagonal_win?
+        false
+    end
+
+    def player_wins?(location)
+        x = location.first
+        y = location.last
+        row = self.board[x]
+
+        return true if row_win?(row) || column_win? || diagonal_win?
+        false
+    end 
+
+  private
+       # returns an array that reflects the player turn order based on a dice roll
     def set_turn_order(player1, player2)
         players = [player1, player2]
         players.sort! { |one, two| one.roll_dice <=> two.roll_dice }.reverse!
