@@ -32,7 +32,9 @@ class Game
     end
 
     def show_board
-        self.board.each { |row| puts "[#{row[0]}][#{row[1]}][#{row[2]}]".gsub("0", " ").gsub("-1", "X").gsub("1", "O") }
+        self.board.each do |row| 
+            puts "[#{row[0]}][#{row[1]}][#{row[2]}]".gsub("0", " ").gsub("-1", "X").gsub("1", "O")
+        end
     end
 
     def place_marker(marker, location)
@@ -53,7 +55,9 @@ class Game
     end
 
     def diagonal_win?
-        false
+        diag1 = self.board[0][0] + self.board[1][1] + self.board[2][2]
+        diag2 = self.board[0][2] + self.board[1][1] + self.board[2][0]
+        diag1 == 3 || diag1 == -3 || diag2 == 3 || diag2 == -3
     end
 
     def player_wins?(location)
