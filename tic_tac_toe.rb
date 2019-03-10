@@ -3,7 +3,6 @@ class Game
     attr_accessor :board, :players
     def initialize
         self.board = Array.new(9) { 0 }.each_slice(3).to_a
-        # self.board = [[1,2,3],[4,5,6],[7,8,9]]
         self.players = set_turn_order(Player.new("Player 1", -1), Player.new("Player 2", 1))
     end
 
@@ -12,7 +11,7 @@ class Game
         loop do
             self.players.each do |player|
                 location = player.get_location(self)
-                player.place_marker(self, location)
+                place_marker(player.marker, location)
                 show_board
                 if player_wins?(location)
                     game_over = true
@@ -26,6 +25,11 @@ class Game
         end
     end
 
+    def space_available?(row, col)
+        self.board[row][col] == 0 ? true : puts("Space taken. Try again.")
+    end
+
+    private
     def show_last_roll_results
         puts("#{self.players[0].name} rolled #{self.players[0].last_roll} ... #{self.players[1].name} rolled #{self.players[1].last_roll}.")
         puts("#{self.players[0].name} goes first!")
@@ -39,10 +43,6 @@ class Game
 
     def place_marker(marker, location)
         self.board[location.first][location.last] = marker
-    end
-
-    def space_available?(row, col)
-        self.board[row][col] == 0 ? true : puts("Space taken. Try again.")
     end
 
     def draw?
@@ -89,10 +89,6 @@ class Player
 
     def roll_dice
         self.last_roll = rand(1..100)
-    end
-
-    def place_marker(game, location)
-        game.place_marker(self.marker, location)
     end
 
     def get_location(game)
