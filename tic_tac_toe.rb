@@ -3,6 +3,7 @@ class Game
     attr_accessor :board, :players
     def initialize
         self.board = Array.new(9) { 0 }.each_slice(3).to_a
+        # self.board = [[1,2,3],[4,5,6],[7,8,9]]
         self.players = set_turn_order(Player.new("Player 1", -1), Player.new("Player 2", 1))
     end
 
@@ -48,11 +49,7 @@ class Game
 
     def row_win?(row)
         sum = row.reduce { |total, val| total + val }
-        sum == 3 || sum == -3 ? true : false
-    end
-
-    def column_win?
-        false
+        sum == 3 || sum == -3
     end
 
     def diagonal_win?
@@ -63,9 +60,9 @@ class Game
         x = location.first
         y = location.last
         row = self.board[x]
+        col = self.board.map { |row| row[y] }
 
-        return true if row_win?(row) || column_win? || diagonal_win?
-        false
+        row_win?(row) || row_win?(col) || diagonal_win?
     end 
 
   private
