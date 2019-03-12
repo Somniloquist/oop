@@ -9,8 +9,9 @@ module Mastermind
   
   class Board
     attr_accessor :decoding_grid, :key_grid
-    attr_reader :decoding_grid, :key_grid, :pegs
+    attr_reader :decoding_grid, :key_grid, :pegs, :secret
     def initialize(input = {})
+      @secret = input.fetch(:secret)
       @decoding_grid = []
       @key_grid = []
       @pegs = default_pegs
@@ -45,17 +46,20 @@ module Mastermind
 
   class Game
     attr_reader :board, :player, :ai_player
-    def initialize(board = Board.new)
+    def initialize(board = Board.new(secret: get_random_code))
       @player = get_human_player
       @ai_player = get_ai_player
+      @board = board
     end
 
     def play
     end
 
+    private
     def get_human_player
       player_name = solicit_name
-      player_role = solicit_role
+      # assume player will always choose code breaker for now
+      player_role = 1 #solicit_role
       Player.new(name: player_name, role: player_role)
     end
 
@@ -66,7 +70,7 @@ module Mastermind
 
     def solicit_role
       loop do
-        print ("Select a role. [1 - Code Breaker | 2 - Code Master]: ")
+        print ("Select a role. [1]Code Breaker | [2]Code Master: ")
         role = gets.chomp.to_i
         return role if role.between?(1,2)
       end
@@ -77,18 +81,19 @@ module Mastermind
       gets.chomp
     end
 
+    def get_random_code
+      code = []
+      4.times { code << Cell.new((0..9).to_a.sample.to_s) }
+      code
+    end
+
   end
 
 end
 
 include Mastermind
 game = Game.new
-board = Board.new
-p game.player.name
-p game.player.role
-
-p game.ai_player.name
-p game.ai_player.role
+p game.board.secret
 
 # puts "====== TURN 1 ======="
 # board.decoding_grid << [Cell.new("1"), Cell.new("2"), Cell.new("3"), Cell.new("4")]
