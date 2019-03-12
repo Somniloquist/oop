@@ -25,8 +25,11 @@ module Mastermind
         self.key_grid.reverse[i].each { |cell| print "#{cell.value.empty? ? '' : cell.value + ' '}" }
         puts ""
       end
+    end
 
-      nil
+    def print_formatted_secret
+      self.secret.each { |cell| print "#{cell.value} " }
+      puts ""
     end
 
     private
@@ -93,7 +96,7 @@ end
 
 include Mastermind
 game = Game.new
-p game.board.secret
+game.board.print_formatted_secret
 
 # puts "====== TURN 1 ======="
 # board.decoding_grid << [Cell.new("1"), Cell.new("2"), Cell.new("3"), Cell.new("4")]
