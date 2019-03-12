@@ -8,10 +8,12 @@ module Mastermind
   end
   
   class Board
-    attr_reader :decoding_grid, :key_grid
+    attr_accessor :decoding_grid, :key_grid
+    attr_reader :decoding_grid, :key_grid, :pegs
     def initialize(input = {})
-      @decoding_grid = input.fetch(:grid, default_decoding_grid)
-      @key_grid = default_key_grid
+      @decoding_grid = []
+      @key_grid = []
+      @pegs = default_pegs
     end
 
     def print_formatted_board
@@ -27,35 +29,72 @@ module Mastermind
     end
 
     private
-    def default_decoding_grid
-      Array.new(10) { Array.new(4) { Cell.new } }
-    end
-
-    def default_key_grid
-      Array.new(10) { Array.new(4) { Cell.new } }
+    def default_pegs
+      "123456".split("")
     end
   end
 
   class Player
-    attr_reader :name
+    attr_reader :name, :role
     def initialize(input)
       @name = input.fetch(:name)
+      @role = input.fetch(:role)
     end
+
   end
 
   class Game
+    attr_reader :board, :player, :ai_player
+    def initialize(board = Board.new)
+      @player = get_human_player
+      @ai_player = get_ai_player
+    end
+
+    def play
+    end
+
+    def get_human_player
+      player_name = solicit_name
+      player_role = solicit_role
+      Player.new(name: player_name, role: player_role)
+    end
+
+    def get_ai_player
+      self.player.role == 1 ? ai_role = 2 : ai_role = 1
+      Player.new(name: "Computer", role: ai_role)
+    end
+
+    def solicit_role
+      loop do
+        print ("Select a role. [1 - Code Breaker | 2 - Code Master]: ")
+        role = gets.chomp.to_i
+        return role if role.between?(1,2)
+      end
+    end
+
+    def solicit_name
+      print("What is your name?: ")
+      gets.chomp
+    end
+
   end
+
 end
 
 include Mastermind
-test = Board.new
+game = Game.new
+board = Board.new
+p game.player.name
+p game.player.role
 
-test.decoding_grid[0][0].value = "1"
-test.decoding_grid[0][1].value = "1"
-test.decoding_grid[0][2].value = "1"
-test.decoding_grid[0][3].value = "1"
+p game.ai_player.name
+p game.ai_player.role
 
-test.key_grid[0][0].value = "X"
-test.key_grid[0][3].value = "O"
-
-test.print_formatted_board
+# puts "====== TURN 1 ======="
+# board.decoding_grid << [Cell.new("1"), Cell.new("2"), Cell.new("3"), Cell.new("4")]
+# board.key_grid << [Cell.new, Cell.new, Cell.new, Cell.new]
+# board.print_formatted_board
+# puts "====== TURN 2 ======="
+# board.decoding_grid << [Cell.new("1"), Cell.new("2"), Cell.new("3"), Cell.new("4")]
+# board.key_grid << [Cell.new, Cell.new, Cell.new, Cell.new]
+# board.print_formatted_board
