@@ -49,10 +49,10 @@ module Mastermind
 
   class Game
     attr_reader :board, :player, :ai_player
-    def initialize(board = Board.new(secret: get_random_code))
+    def initialize()
       @player = get_human_player
       @ai_player = get_ai_player
-      @board = board
+      @board = Board.new(secret: get_secret_code)
     end
 
     def play
@@ -62,7 +62,7 @@ module Mastermind
     def get_human_player
       player_name = solicit_name
       # assume player will always choose code breaker for now
-      player_role = 1 #solicit_role
+      player_role = 2 #solicit_role
       Player.new(name: player_name, role: player_role)
     end
 
@@ -73,7 +73,7 @@ module Mastermind
 
     def solicit_role
       loop do
-        print ("Select a role. [1]Code Breaker | [2]Code Master: ")
+        print("Select a role. [1]Code Breaker | [2]Code Master: ")
         role = gets.chomp.to_i
         return role if role.between?(1,2)
       end
@@ -82,6 +82,21 @@ module Mastermind
     def solicit_name
       print("What is your name?: ")
       gets.chomp
+    end
+
+    def solicit_secret_code
+      puts("You are the code master, choose a secret code.")
+      loop do
+        print("Enter a 4 digit code: ")
+        # convert to_i to strop non number characters before converting to_a
+        code = gets.chomp.to_i.to_s.split('')
+        return code if code.length == 4
+      end
+    end
+
+    def get_secret_code
+      return get_random_code if self.player.role == 1
+      solicit_secret_code
     end
 
     def get_random_code
@@ -96,7 +111,6 @@ end
 
 include Mastermind
 game = Game.new
-game.board.print_formatted_secret
 
 # puts "====== TURN 1 ======="
 # board.decoding_grid << [Cell.new("1"), Cell.new("2"), Cell.new("3"), Cell.new("4")]
