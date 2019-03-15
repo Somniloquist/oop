@@ -9,7 +9,7 @@ module Mastermind
   
   class Board
     attr_accessor :decoding_grid, :key_grid
-    attr_reader :decoding_grid, :key_grid, :pegs, :secret
+    attr_reader :pegs, :secret
     def initialize(input = {})
       @secret = input.fetch(:secret)
       @decoding_grid = []
@@ -48,23 +48,36 @@ module Mastermind
   end
 
   class Game
-    attr_accessor :turn
-    attr_reader :board, :player, :ai_player
-    def initialize()
+    attr_accessor :current_turn
+    attr_reader :board, :player, :ai_player, :max_turns, :code_length
+    def initialize(input = {})
       @player = get_human_player
       @ai_player = get_ai_player
       @board = Board.new(secret: get_secret_code)
-      @turn = 1
+      @current_turn = 1
+      @max_turns = input.fetch(:turns, 10)
+      @code_length = input.fetch(:code_length, 4)
     end
 
     def play
-      code_breaker, code_master = 1, 2
+      code_breaker = 1
+      message = "Break the code!"
+
       if player.role == code_breaker
-        guess = solicit_code { puts("Guess the 4 digit code.") }
-        if codes_match?(guess, board.secret)
-          puts("You win!")
-        else
-          puts("You lose.")
+        max_turns.times do 
+          puts("===== Turn #{current_turn} =====")
+          guess = solicit_code { puts(message) }
+          push_to_decoding_grid(guess)
+          if codes_match?(guess, board.secret)
+            puts("You win!")
+            return
+          else
+            matches = get_code_matches(guess, board.secret)
+            push_to_key_grid(matches)
+            board.print_formatted_board
+          end
+
+          current_turn < 10 ? next_turn : puts("You lose.")
         end
       else
         puts "Code Master Not yet implemented."
@@ -73,6 +86,19 @@ module Mastermind
     end
 
     private
+    def push_to_decoding_grid(code)
+      code = code.map { |value| Cell.new(value) }
+      board.decoding_grid.push << code
+    end
+
+    def push_to_key_grid(code)
+      board.key_grid.push << code
+    end
+
+    def next_turn
+      @current_turn += 1
+    end
+
     def get_human_player
       player_name = solicit_name
       player_role = solicit_role
@@ -89,6 +115,20 @@ module Mastermind
       guess == secret_code
     end
 
+    def get_code_matches(guess, secret)
+      matches = []
+      # compare exact matches
+      code_length.times do |i|
+
+        # for testign
+        p("guess:#{guess[i]}, secret:#{secret[i].value}")
+
+        matches << Cell.new("1") if secret[i].value == guess[i]
+      end
+
+      matches
+    end
+
     def solicit_role
       loop do
         print("Select a role. [1]Code Breaker | [2]Code Master: ")
@@ -103,12 +143,13 @@ module Mastermind
     end
 
     def solicit_code
-      yield
+      yield if block_given?
       loop do
-        print("Enter a 4 digit code: ")
+        print("Enter a four digit code: ")
         # convert to_i to strip non number characters before converting to_a
+        # bug: this method strips leading zeros
         code = gets.chomp.to_i.to_s.split('')
-        return code if code.length == 4
+        return code if code.length == code_length
       end
     end
 
@@ -131,12 +172,3 @@ include Mastermind
 
 game = Game.new
 game.play
-
-# puts "====== TURN 1 ======="
-# game.board.decoding_grid << [Cell.new("1"), Cell.new("2"), Cell.new("3"), Cell.new("4")]
-# game.board.key_grid << [Cell.new, Cell.new, Cell.new, Cell.new]
-# game.board.print_formatted_board
-# puts "====== TURN 2 ======="
-# game.board.decoding_grid << [Cell.new("1"), Cell.new("2"), Cell.new("3"), Cell.new("4")]
-# game.board.key_grid << [Cell.new, Cell.new, Cell.new, Cell.new]
-# game.board.print_formatted_board
