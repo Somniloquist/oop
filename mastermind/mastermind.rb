@@ -39,9 +39,8 @@ module Mastermind
   end
 
   class Player
-    attr_reader :name, :role
+    attr_reader :role
     def initialize(input)
-      @name = input.fetch(:name)
       @role = input.fetch(:role)
     end
 
@@ -100,9 +99,8 @@ module Mastermind
     end
 
     def get_human_player
-      player_name = solicit_name
       player_role = solicit_role
-      Player.new(name: player_name, role: player_role)
+      Player.new(role: player_role)
     end
 
     def get_ai_player
@@ -116,14 +114,33 @@ module Mastermind
     end
 
     def get_code_matches(guess, secret)
+      guess_copy = guess[0, guess.length]
+      secret_copy = secret.map { |cell| cell.value }
       matches = []
+
       # compare exact matches
       code_length.times do |i|
+        if secret_copy[i] == guess_copy[i]
+          matches << Cell.new("1") 
+          secret_copy[i], guess_copy[i] = nil
+        end
+      end
 
-        # for testign
-        p("guess:#{guess[i]}, secret:#{secret[i].value}")
+      guess_copy.compact!
+      secret_copy.compact!
+      rough_matches = []
+      guess_copy.each_with_index do |g_value, g_index|
+        code_length.times do |i|
+          if g_value == secret_copy[i]
+            rough_matches << g_value
+            secret_copy[i] = nil
+            break
+          end
+        end
+      end
 
-        matches << Cell.new("1") if secret[i].value == guess[i]
+      rough_matches.compact.flatten.length.times do |thing|
+        matches << Cell.new("0")
       end
 
       matches
@@ -147,7 +164,7 @@ module Mastermind
       loop do
         print("Enter a four digit code: ")
         # convert to_i to strip non number characters before converting to_a
-        # bug: this method strips leading zeros
+        # bug: this method strips leading zeros (ex. 0192 == 192)
         code = gets.chomp.to_i.to_s.split('')
         return code if code.length == code_length
       end
