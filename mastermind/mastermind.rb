@@ -178,9 +178,17 @@ module Mastermind
         print("Enter a four digit code: ")
         # convert to_i to strip non number characters before converting to_a
         # bug: this method strips leading zeros (ex. 0192 == 192)
-        code = gets.chomp.to_i.to_s.split('')
-        return code if code.length == code_length
+        code = gets.chomp.split('')
+        return code if code_valid?(code)
       end
+    end
+
+    def code_valid?(code)
+      return false unless code.length == 4
+      code.each do |char|
+        return false unless char.match(/\d/)
+      end
+      true
     end
 
     def get_secret_code

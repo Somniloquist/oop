@@ -6,28 +6,13 @@ class Cell
   end
 end
 
-def test
-  secret = [1,1,1,1]
-  guess  = [1,1,4,0]
-  rough_matches = []
-  matches = []
-
-  guess.each_with_index do |cell, cell_i|
-    4.times do |i|
-      if cell == secret[i]
-        p("#{guess[cell_i]} : #{secret[i]}")
-        rough_matches << 0
-        secret[i] = nil
-        break
-      end
-    end
+def code_valid?(code)
+  return false unless code.length == 4
+  code.split('').each do |char|
+    return false unless char.match(/\d/)
   end
-
-  p secret
-  p guess
-
-  p rough_matches
-
+  true
 end
 
-test
+p code_valid?("1234")
+p code_valid?("12i2")
