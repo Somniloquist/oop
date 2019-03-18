@@ -18,8 +18,6 @@ module Mastermind
     end
 
     def print_formatted_board
-      p key_grid.length
-      p decoding_grid.length
       grid_border = "| "
       self.decoding_grid.reverse.each_with_index do |row, i|
         row.each { |cell| print("#{cell.value.empty? ? ' ' : cell.value} ")}
@@ -70,22 +68,21 @@ module Mastermind
           puts("===== Turn #{current_turn} =====")
           guess = solicit_code { puts(message) }
           push_to_decoding_grid(guess)
-          board.print_formatted_secret
+
+          matches = get_code_matches(guess, board.secret)
+          push_to_key_grid(matches)
+
           if codes_match?(guess, board.secret)
             show_game_over_message("===== CONGRATULATIONS - YOU WIN =====")
             return
-          else
-            matches = get_code_matches(guess, board.secret)
-            push_to_key_grid(matches)
-            board.print_formatted_board
           end
-          
+
           if current_turn < 10
+            board.print_formatted_board
             next_turn
           else
             show_game_over_message("===== GAME OVER - YOU LOSE =====")
           end
-
         end
       else
         puts "Code Master Not yet implemented."
