@@ -19,7 +19,7 @@ module Mastermind
     def print_formatted_board
       grid_border = "| "
       self.decoding_grid.reverse.each_with_index do |row, i|
-        row.each { |cell| print("#{cell.value.empty? ? ' ' : cell.value} ")}
+        row.each { |cell| print("#{cell.value} ")}
         print grid_border
         self.key_grid.reverse[i].each { |cell| print "#{cell.value.empty? ? '' : cell.value + ' '}" }
         puts ""
@@ -76,12 +76,19 @@ module Mastermind
 
         show_game_over_message("===== GAME OVER - YOU LOSE =====")
       when code_master
-        puts "Code Master Not yet implemented."
-        puts "Ending game."
+        ai_plays  
+        show_game_over_message("===== GAME OVER - YOU LOSE =====")
       end
     end
 
     private
+
+    def ai_plays
+      guess = get_random_code
+      push_to_decoding_grid(guess)
+      matches = get_code_matches(guess, board.secret)
+      push_to_key_grid(matches)
+    end
 
     def show_game_over_message(message)
       puts(message)
@@ -90,7 +97,6 @@ module Mastermind
     end
 
     def push_to_decoding_grid(code)
-      code = code.map { |value| Cell.new(value) }
       board.decoding_grid.push << code
     end
 
@@ -118,20 +124,21 @@ module Mastermind
     end
 
     def get_code_matches(guess, secret)
-      # copy into new array to avoid mutating the originals
-      guess_copy = guess[0, guess.length]
+      # copy values into an tmep arrays to avoid mutating the original objects
+      guess_copy = guess.map { |cell| cell.value }
       secret_copy = secret.map { |cell| cell.value }
 
-      matches = extract_exact_matches(guess_copy, secret_copy)
-      rough_matches = extract_rough_matches(guess_copy, secret_copy)
-      rough_matches.length.times do |thing|
+      matches = extract_exact_matches!(guess_copy, secret_copy)
+      rough_matches = extract_rough_matches!(guess_copy, secret_copy)
+
+      rough_matches.length.times do
         matches << Cell.new("0")
       end
 
       matches
     end
 
-    def extract_rough_matches(arr1, arr2)
+    def extract_rough_matches!(arr1, arr2)
       matches = []
       arr1.each_with_index do |a1_value, a1_index|
         code_length.times do |a2_index|
@@ -145,7 +152,7 @@ module Mastermind
       matches.compact
     end
 
-    def extract_exact_matches(arr1, arr2)
+    def extract_exact_matches!(arr1, arr2)
       matches = []
       code_length.times do |i|
         if arr1[i] == arr2[i]
@@ -174,7 +181,7 @@ module Mastermind
       loop do
         print("Enter a four digit code: ")
         code = gets.chomp.split('')
-        return code if code_valid?(code)
+        return code.map { |value| Cell.new(value) } if code_valid?(code)
       end
     end
 
@@ -203,5 +210,5 @@ end
 
 include Mastermind
 
-game = Game.new
+game = Game.new(turns: 12)
 game.play
