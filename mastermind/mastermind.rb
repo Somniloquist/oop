@@ -9,12 +9,11 @@ module Mastermind
   
   class Board
     attr_accessor :decoding_grid, :key_grid
-    attr_reader :pegs, :secret
+    attr_reader :secret
     def initialize(input = {})
       @secret = input.fetch(:secret)
       @decoding_grid = []
       @key_grid = []
-      @pegs = default_pegs
     end
 
     def print_formatted_board
@@ -31,11 +30,6 @@ module Mastermind
       self.secret.each { |cell| print "#{cell.value} " }
       puts ""
       puts "--------+"
-    end
-
-    private
-    def default_pegs
-      "123456".split("")
     end
   end
 
