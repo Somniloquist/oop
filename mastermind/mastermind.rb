@@ -60,15 +60,14 @@ module Mastermind
     end
 
     def play
-      code_breaker = 1
-      message = "Break the code!"
+      code_breaker, code_master = 1, 2
 
-      if player.role == code_breaker
+      case player.role
+      when code_breaker
         max_turns.times do 
           puts("===== Turn #{current_turn} =====")
-          guess = solicit_code { puts(message) }
+          guess = solicit_code
           push_to_decoding_grid(guess)
-
           matches = get_code_matches(guess, board.secret)
           push_to_key_grid(matches)
 
@@ -77,14 +76,12 @@ module Mastermind
             return
           end
 
-          if current_turn < 10
-            board.print_formatted_board
-            next_turn
-          else
-            show_game_over_message("===== GAME OVER - YOU LOSE =====")
-          end
+          board.print_formatted_board
+          next_turn
         end
-      else
+
+        show_game_over_message("===== GAME OVER - YOU LOSE =====")
+      when code_master
         puts "Code Master Not yet implemented."
         puts "Ending game."
       end
@@ -127,36 +124,43 @@ module Mastermind
     end
 
     def get_code_matches(guess, secret)
+      # copy into new array to avoid mutating the originals
       guess_copy = guess[0, guess.length]
       secret_copy = secret.map { |cell| cell.value }
-      matches = []
 
-      # compare exact matches
-      code_length.times do |i|
-        if secret_copy[i] == guess_copy[i]
-          matches << Cell.new("1") 
-          secret_copy[i], guess_copy[i] = nil
-        end
-      end
-
-      guess_copy.compact!
-      secret_copy.compact!
-      rough_matches = []
-      guess_copy.each_with_index do |g_value, g_index|
-        code_length.times do |i|
-          if g_value == secret_copy[i]
-            rough_matches << g_value
-            secret_copy[i] = nil
-            break
-          end
-        end
-      end
-
-      rough_matches.compact.flatten.length.times do |thing|
+      matches = extract_exact_matches(guess_copy, secret_copy)
+      rough_matches = extract_rough_matches(guess_copy, secret_copy)
+      rough_matches.length.times do |thing|
         matches << Cell.new("0")
       end
 
       matches
+    end
+
+    def extract_rough_matches(arr1, arr2)
+      matches = []
+      arr1.each_with_index do |a1_value, a1_index|
+        code_length.times do |a2_index|
+          if a1_value == arr2[a2_index]
+            matches << a1_value
+            arr2[a2_index] = nil
+            break
+          end
+        end
+      end
+      matches.compact
+    end
+
+    def extract_exact_matches(arr1, arr2)
+      matches = []
+      code_length.times do |i|
+        if arr1[i] == arr2[i]
+          matches << Cell.new("1") 
+          # set elements to nil to prevent running out of bounds
+          arr1[i], arr2[i] = nil
+        end
+      end
+      matches.compact
     end
 
     def solicit_role
@@ -173,11 +177,8 @@ module Mastermind
     end
 
     def solicit_code
-      yield if block_given?
       loop do
         print("Enter a four digit code: ")
-        # convert to_i to strip non number characters before converting to_a
-        # bug: this method strips leading zeros (ex. 0192 == 192)
         code = gets.chomp.split('')
         return code if code_valid?(code)
       end
