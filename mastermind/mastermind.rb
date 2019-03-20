@@ -38,7 +38,6 @@ module Mastermind
     def initialize(input)
       @role = input.fetch(:role)
     end
-
   end
 
   class Game
@@ -74,22 +73,41 @@ module Mastermind
         push_to_decoding_grid(guess)
         matches = get_code_matches(guess, board.secret)
         push_to_key_grid(matches)
-
         return true if codes_match?(guess, board.secret)
         board.print_formatted_board
+        next_turn
+      end
+      false
+    end
+
+    def ai_plays
+      guess = get_random_code
+
+      max_turns.times do
+        matches = get_code_matches(guess, board.secret)
+        push_to_decoding_grid(guess)
+        push_to_key_grid(matches)
+        return true if codes_match?(guess, board.secret)
+
+        guess = ai_guess_again(guess)
+
         next_turn
       end
 
       false
     end
 
-    def ai_plays
-      guess = get_random_code
-      push_to_decoding_grid(guess)
-      matches = get_code_matches(guess, board.secret)
-      push_to_key_grid(matches)
+    def ai_guess_again(guess)
+      new_guess = []
+      guess.length.times do |i|
+        if guess[i].value == board.secret[i].value
+          new_guess << guess[i]
+        else
+          new_guess << Cell.new((0..9).to_a.sample.to_s)
+        end
+      end
 
-      return false
+      new_guess
     end
 
     def show_game_over_message(message)
@@ -99,6 +117,8 @@ module Mastermind
     end
 
     def push_to_decoding_grid(code)
+        # debugging
+        # puts "Turn: #{current_turn} #{v.map {|v| v.value}}"
       board.decoding_grid.push << code
     end
 
