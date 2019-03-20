@@ -55,43 +55,45 @@ module Mastermind
 
     def play
       code_breaker, code_master = 1, 2
-
       case player.role
       when code_breaker
-        max_turns.times do 
-          puts("===== Turn #{current_turn} =====")
-          guess = solicit_code
-          push_to_decoding_grid(guess)
-          matches = get_code_matches(guess, board.secret)
-          push_to_key_grid(matches)
-
-          if codes_match?(guess, board.secret)
-            show_game_over_message("===== CONGRATULATIONS - YOU WIN =====")
-            return
-          end
-
-          board.print_formatted_board
-          next_turn
-        end
-
-        show_game_over_message("===== GAME OVER - YOU LOSE =====")
+        player_plays ? message = "YOU WIN" : message = "YOU LOSE"
+        show_game_over_message(message)
       when code_master
-        ai_plays  
-        show_game_over_message("===== GAME OVER - YOU LOSE =====")
+        ai_plays ? message = "YOU LOSE" : message = "YOU WIN"
+        show_game_over_message(message)
       end
     end
 
     private
+
+    def player_plays
+      max_turns.times do 
+        puts("===== Turn #{current_turn} =====")
+        guess = solicit_code
+        push_to_decoding_grid(guess)
+        matches = get_code_matches(guess, board.secret)
+        push_to_key_grid(matches)
+
+        return true if codes_match?(guess, board.secret)
+        board.print_formatted_board
+        next_turn
+      end
+
+      false
+    end
 
     def ai_plays
       guess = get_random_code
       push_to_decoding_grid(guess)
       matches = get_code_matches(guess, board.secret)
       push_to_key_grid(matches)
+
+      return false
     end
 
     def show_game_over_message(message)
-      puts(message)
+      puts("===== #{message} =====")
       board.print_formatted_secret
       board.print_formatted_board
     end
@@ -119,8 +121,9 @@ module Mastermind
     end
 
     def codes_match?(guess, secret)
-      secret_code = secret.map { |cell| cell.value }
-      guess == secret_code
+      secret_values = secret.map { |cell| cell.value }
+      guess_values = guess.map { |cell| cell.value }
+      guess_values == secret_values
     end
 
     def get_code_matches(guess, secret)
