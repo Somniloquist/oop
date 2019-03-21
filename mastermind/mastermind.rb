@@ -98,9 +98,10 @@ module Mastermind
     end
 
     def ai_guess_again(guess)
+      secrets = board.secret.map { |cell| cell.value }
       new_guess = []
       guess.length.times do |i|
-        if guess[i].value == board.secret[i].value
+        if guess[i].value == secrets[i]
           new_guess << guess[i]
         else
           new_guess << Cell.new((0..9).to_a.sample.to_s)
