@@ -107,5 +107,6 @@ module TicTacToe
 		end
 	end
 
-game = Game.new.play
 end
+
+# game = TicTacToe::Game.new.play
