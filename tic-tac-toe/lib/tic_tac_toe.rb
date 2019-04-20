@@ -27,7 +27,7 @@ module TicTacToe
 		end
 
 		def space_available?(row, col)
-			self.board[row][col] == 0 ? true : puts("Space taken. Try again.")
+			self.board[row][col] == 0
 		end
 
 		private
@@ -70,7 +70,6 @@ module TicTacToe
 			row_win?(row) || row_win?(col) || diagonal_win?
 		end 
 
-	private
 		# returns an array that reflects the player turn order based on a dice roll
 		def set_turn_order(player1, player2)
 			players = [player1, player2]
